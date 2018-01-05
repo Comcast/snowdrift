@@ -7,7 +7,7 @@ TL;DR This is unit testing for firewall rules. It will change your workflow for 
 In a firewall heavy environment, being able to test and validate your firewall rules is essential.  
 
 This utility aims to automate that by having "rules files" which this script then procesess
-and will SSH into each machine and try connecting to the target host.
+and will SSH into each machine and try connecting to the target host on the specified port.
 
 By writing and saving rules file, you now have **unit test-like ability for testing firewall changes**. 
 After changes are made, you can use this script to **verify correctness of firewall operation**, as opposed
