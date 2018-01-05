@@ -6,6 +6,8 @@ In a firewall heavy environment, being able to test your firewall rules is essen
 This utility aims to automate that by having "rules files" which this script then procesess
 and will SSH into each machine and try connecting to the target host.
 
+<img src="./img/snowdrift.png" align="right" />
+
 By writing and saving rules file, you now have **unit test-like ability for testing firewall changes**. 
 After changes are made, you can use this script to **verify correctness of firewall operation**, as opposed
 to having to SSH to different machines by hand, run netcat manually, and then run Traceroute manually
