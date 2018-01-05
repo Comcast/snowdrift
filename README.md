@@ -1,10 +1,10 @@
-# Firewall Rule Testing
+# Snowdrift: Firewall Rule Testing
 
 <img src="./img/snowdrift.png" align="right" />
 
 TL;DR This is unit testing for firewall rules. It will change your workflow for the better.
 
-In a firewall heavy environment, being able to test your firewall rules is essential.  
+In a firewall heavy environment, being able to test and validate your firewall rules is essential.  
 This utility aims to automate that by having "rules files" which this script then procesess
 and will SSH into each machine and try connecting to the target host.
 
