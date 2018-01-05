@@ -1,0 +1,7 @@
+
+*.swp
+*~
+
+# Mac OS
+.DS_Store
+

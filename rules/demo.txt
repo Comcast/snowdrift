@@ -1,0 +1,19 @@
+
+#
+# Demo rules file.  This will use your current machine as the host.
+#
+tag1/localhost:google.com:80
+tag1/localhost:google.com:443
+tag2/localhost:www.comcast.com:80
+tag2/localhost:www.comcast.com:443
+tag3/localhost::dns:
+tag3/localhost::dns:cnn.com
+
+#
+# These next ones will fail
+#
+these-will-fail/this-will-fail.comcast.com:google.com:80
+these-will-fail/10.0.0.0:google.com:80
+these-will-fail/10.0.0.0:google.com:80
+
+

@@ -1,0 +1,834 @@
+#!/bin/bash
+#
+# This script is used to test network paths by SSHing into the target host and
+# performing the required operation.
+#
+# Debug environemtal variables:
+#
+#	$DEBUG_CMD - Set to print out the command sent to SSH
+#	$DEBUG_CMD_OUTPUT- Print raw output from SSH commands
+#	$DEBUG_SSH_CHECK - Set to print out logic used for checking whether we can SSH to a host or not
+# 
+
+# Errors are fatal
+set -e
+
+#
+# Our timeout
+#
+TIMEOUT=3
+
+#
+# Our filter
+# 
+FILTER=""
+
+#
+# Are we doing a traceroute on failed connections?
+#
+TRACEROUTE=""
+TCP_TRACEROUTE=""
+TRACEROUTE_FORCE=""
+TCP_TRACEROUTE_FORCE=""
+
+#
+# ANSI codes for colors
+#
+RED="\033[0;31m"
+GREEN="\033[0;32m"
+NC="\033[0m"
+
+#
+# Strings which keep track of hostnames we have successfully SSHed to and not.
+# These can save us from repeatedly trying to SSH into a host that we can't get to.
+# The contents of the strings are hostnames preceded by colons.
+#
+# e.g. :host1:host2:host3:etc.
+#
+SSH_SUCCESS=""
+SSH_FAIL=""
+
+#
+# Stats on our succesful and failed connections
+#
+STATS_SUCCESS=0
+STATS_FAIL=0
+STATS_SSH_SUCCESS=0
+STATS_SSH_FAIL=0
+STATS_TOTAL_SUCCESS=0
+STATS_TOTAL_FAIL=0
+STATS_TOTAL_SSH_SUCCESS=0
+STATS_TOTAL_SSH_FAIL=0
+
+
+#
+# Determine what color to use
+#
+function getColor() {
+
+	OUTPUT=$1
+
+	RETVAL=$NC
+	if [[ "$OUTPUT" =~ OK.* ]]
+	then
+		RETVAL=$GREEN
+
+	elif [[ "$OUTPUT" =~ Timeout.* ]]
+	then
+		RETVAL=$RED
+
+	elif test "$OUTPUT" == "FAIL"
+	then
+		RETVAL=$RED
+
+	else
+		RETVAL="$RED[UNKNOWN] "
+
+	fi
+
+	echo $RETVAL
+
+} # End of getColor()
+
+
+#
+# Update our stats
+#
+function updateStats() {
+
+	STR=$1
+	if [[ "$STR" =~ OK.* ]]
+	then
+		STATS_SUCCESS=$(( STATS_SUCCESS + 1 ))
+		STATS_TOTAL_SUCCESS=$(( STATS_TOTAL_SUCCESS + 1 ))
+	else 
+		STATS_FAIL=$(( STATS_FAIL + 1 ))
+		STATS_TOTAL_FAIL=$(( STATS_TOTAL_FAIL + 1 ))
+	fi
+
+} # End of updateStats()
+
+
+#
+# Check to see if we can SSH to a host, and update the success or fail strings accordingly.
+#
+function checkSSHHost() {
+
+	HOST=$1
+
+	set +e
+	ssh -o ConnectTimeout=${TIMEOUT} $HOST "hostname" >/dev/null 2>&1
+	RETVAL=$?
+	set -e
+
+	if test "$RETVAL" -eq 0
+	then
+		SSH_SUCCESS="${SSH_SUCCESS}:$HOST"
+		STATS_SSH_SUCCESS=$(( STATS_SSH_SUCCESS + 1))
+		STATS_TOTAL_SSH_SUCCESS=$(( STATS_TOTAL_SSH_SUCCESS + 1))
+
+	else
+		sshDebug "Retval for host $HOST was $RETVAL"
+		SSH_FAIL="${SSH_FAIL}:$HOST"	
+		STATS_SSH_FAIL=$(( STATS_SSH_FAIL + 1))
+		STATS_TOTAL_SSH_FAIL=$(( STATS_TOTAL_SSH_FAIL + 1))
+
+	fi
+
+} # End of checkSSHHost()
+
+
+#
+# Check to see if we were successful in connecting to a host via SSH.
+#
+function isSSHSuccess() {
+
+	HOST=$1
+	if [[ "$SSH_SUCCESS" =~ .*:${HOST}.* ]]
+	then
+		echo true
+	fi
+
+} # End of isSSHSuccess()
+
+
+#
+# Check to see if we were not successful in connecting to a host via SSH
+#
+function isSSHFail() {
+
+	HOST=$1
+	if [[ "$SSH_FAIL" =~ .*:${HOST}.* ]]
+	then
+		echo true
+	fi
+
+} # End of isSSHFail()
+
+
+#
+# Print out debugging messages for SSH logic
+#
+function sshDebug() {
+
+	if test "$DEBUG_SSH_CHECK"
+	then
+		echo "SSH_DEBUG: $@"
+	fi
+
+} # End of sshDebug()
+
+
+#
+# Parse our output and return a well structured string.
+#
+function parseOutput() {
+
+	PORT=$1
+	OUTPUT=$2
+	RETVAL=$3
+
+	#
+	# This changes the localization type so that the =~ comparisons later
+	# in this function no longer car about newlines, and responses such
+	# as MySQL asking for a password followed by the "succeeded" message
+	# are parsed properly.
+	#
+	# It's a neat little hack!
+	#
+	export LC_CTYPE=C
+
+	if test "$PORT" != "dns"
+	then
+		if [[ "$OUTPUT" =~ .*succeeded.*  ]]
+		then
+			echo "OK"
+		elif [[ "$OUTPUT" =~ .*Connected.* ]]
+		then
+			echo "OK"
+
+		elif [[ "$OUTPUT" =~ .*refused.* ]]
+		then
+			echo "OK: Connection Refused"
+
+		elif [[ "$OUTPUT" =~ .*timed\ out.* ]]
+		then
+			echo "Timeout"
+
+		elif [[ "$OUTPUT" == "dns:OK" ]]
+		then
+			echo "OK"
+
+		elif [[ "$OUTPUT" == "dns:FAIL" ]]
+		then
+			echo "FAIL"
+
+		else
+			echo "UNKNOWN: $OUTPUT"
+		fi
+
+	else
+		if test "$RETVAL" == 0
+		then
+			if test "$OUTPUT"
+			then
+				echo "OK: Got Response: $(echo $OUTPUT)"
+			else
+				echo "OK: Got no response (bad DNS name?)"
+			fi
+
+		else
+			if test "$RETVAL" == 9
+			then
+				echo "FAIL: Got timeout from DNS server. (Retval $RETVAL)"
+			else
+				echo "FAIL: Got unknown error. (Retval $RETVAL)"
+			fi
+
+		fi
+		
+
+	fi
+
+} # End of parseOutput()
+
+
+#
+# Function to check to see if we need to do any traceroutes and then do them.
+#
+function doTraceroutes() {
+
+	SRC=$1
+	DEST=$2
+	PORT=$3
+	OUTPUT=$4
+
+	DO_TRACEROUTE=""
+	DO_TCP_TRACEROUTE=""
+
+	if test "$TRACEROUTE_FORCE"
+	then
+		DO_TRACEROUTE=1
+	fi
+
+	if test "$TCP_TRACEROUTE_FORCE"
+	then
+		DO_TCP_TRACEROUTE=1
+	fi
+
+	if test "$OUTPUT" == "Timeout" -o "$OUTPUT" == "dns:FAIL"
+	then
+		if test "$TRACEROUTE"
+		then
+			DO_TRACEROUTE=1
+		fi
+
+		if test "$TCP_TRACEROUTE"
+		then
+			DO_TCP_TRACEROUTE=1
+		fi
+
+	fi
+
+	if test "$DO_TRACEROUTE"
+	then
+		printTraceroute $SRC $DEST
+	fi
+
+	if test "$DO_TCP_TRACEROUTE"
+	then
+		printTcpTraceroute $SRC $DEST $PORT
+	fi
+
+} # End of doTraceroutes()
+
+
+#
+# Print up a traceroute for a failed connection
+#
+function printTraceroute() {
+
+	SRC=$1
+	DEST=$2
+
+	echo "# "
+	echo "# Printing traceroute from $SRC to $DEST..."
+	echo "# "
+	CMD_TRACEROUTE="traceroute -m 15 $DEST"
+	set +e
+	ssh -o ConnectTimeout=${TIMEOUT} $SRC "$CMD_TRACEROUTE" 2>/dev/null
+	set -e
+
+} # End of printTraceroute()
+
+
+#
+# Print up a TCP traceroute for a failed connection
+#
+function printTcpTraceroute() {
+
+	SRC=$1
+	DEST=$2
+	PORT=$3
+
+	echo "# "
+	echo "# Printing TCP traceroute from $SRC to $DEST..."
+	echo "# "
+	CMD_TRACEROUTE="sudo tcptraceroute -m15 $DEST $PORT"
+	set +e
+	#
+	# Set LogLevel to error so we don't get spammed with the MoTD but
+	# can still view any errors from tcptraceroute.
+	#
+	ssh -o ConnectTimeout=${TIMEOUT} -o LogLevel=error $SRC "$CMD_TRACEROUTE"
+	set -e
+
+} # End of printTraceroute()
+
+
+#
+# Function to test a given network path
+#
+function testPath() {
+
+	SRC=$1
+	DEST=$2
+	PORT=$3
+	TAG=$4
+	EXTRA=$5
+
+	#
+	# Were we able to SSH to this host? If not, do a quick test!
+	#
+	if test "$(isSSHSuccess $SRC)" == "" -a "$(isSSHFail $SRC)" == ""
+	then
+		sshDebug "Unknown SSH status for host '$SRC', we need to test..."
+		checkSSHHost $SRC
+	fi
+
+	#
+	# Create our command and DNS-specific variables.
+	#
+	if test "$PORT" != "dns"
+	then
+		if test ! "$PORT"
+		then
+			echo -e "$SRC: ${RED}No TCP port specified, skipping!${NC}"
+			updateStats ""
+			continue
+		fi
+
+		CMD="if test -x /usr/bin/nc; \
+			then NC=/usr/bin/nc; \
+			else NC=\`which nc\`; \
+			fi; \
+			\$NC -v -w${TIMEOUT} $DEST $PORT </dev/null 2>&1 "
+
+	else
+		NS=$DEST
+		RECORD=${EXTRA:-google.com}
+
+		#
+		# If we're testing DNS, perform a simple DNS query that should resolve 
+		# if we have connectivity to our DNS servers
+		#
+		CMD_NS=""
+		if test "$NS"
+		then
+			CMD_NS="@${NS}"
+		fi
+		CMD="dig ${RECORD} $CMD_NS +short +time=${TIMEOUT} </dev/null 2>&1 "
+
+	fi
+
+	#
+	# If we actually couldn't SSH into that host, then oops--bail out here!
+	#
+	OUTPUT="$(isSSHFail $SRC)"
+	if test "$(isSSHFail $SRC)" != ""
+	then
+		sshDebug "Nope, we couldn't SSH to host $SRC. Skipping!"
+
+		if test "$PORT" != "dns"
+		then
+			echo -n "${TAG}${SRC} -> $DEST:$PORT: "
+		else
+			echo -n "${TAG}${SRC} -> $NS:dns:$RECORD: "
+		fi
+		echo -e "${RED}[ Could not SSH to this host, skipping!]${NC}"
+
+		continue
+
+	fi
+
+	if test "$DEBUG_CMD"
+	then
+		echo "DEBUG CMD: $CMD (HOST: $HOST)"
+	fi
+
+	#
+	# Print our line indicating the test that's being done
+	#
+	if test "$PORT" != "dns"
+	then
+		echo -n "${TAG}${SRC} -> $DEST:$PORT: "
+
+	else
+		if test ! "$NS"
+		then
+			NS="[default]"
+		fi
+
+		echo -n "${TAG}${SRC} -> $NS:dns:$RECORD: "
+
+	fi
+
+	#
+	# Run the test, parse the results, and print them.
+	#
+	set +e
+	OUTPUT=$(ssh -o ConnectTimeout=${TIMEOUT} $SRC "$CMD" 2>/dev/null)
+	RETVAL=$?
+	set -e
+
+	if test "$DEBUG_CMD_OUTPUT"
+	then
+		echo
+		echo "SSH OUTPUT: $OUTPUT"
+	fi
+
+	OUTPUT=$(parseOutput "$PORT" "$OUTPUT" "$RETVAL")
+	COLOR=$(getColor $OUTPUT)
+	echo -e "${COLOR}$OUTPUT${NC}"
+
+	#
+	# Are we printing any traceroutes?
+	#
+	doTraceroutes "$SRC" "$DEST" "$PORT" "$OUTPUT"
+
+	updateStats $OUTPUT
+
+} # End of testPath()
+
+
+#
+# Print our syntax and exit
+#
+function printSyntax() {
+
+	echo "! "
+	echo "! Syntax: $0 rules-file [--filter string ] [ rules-file [ rules-file [ ... ] ] ]"
+	echo "! "
+	echo "! rules-file	A rules file with network paths to test"
+	echo "! "
+	echo "! 	Rules format:"
+	echo "! "
+	echo "! 		[tag/]\$source_host:\$dest_host:\$tcp_port"
+	echo "! 			SSH into source_host and use netcat to connec to dest_host on specified TCP port"
+	echo "! "
+	echo "! 		[tag/]\$source_host:[\$dns_server]:dns:[\$hostname]"
+	echo "! 			SSH into source_host and use dig to lookup a hostname against the specified DNS server."
+	echo "! "
+	echo "! 		Tags are optional, and preceed each line with the tag and a forward slash."
+	echo "! "
+	echo "! --filter string	A string which is filtered against, and only matches are processed."
+	echo "! "
+	echo "! 	Examples:"
+	echo "! "
+	echo "! 		Ports: 22, 80, 443, etc."
+	echo "! "
+	echo "! 		Source/destination Hostnames or parts thereof: "
+	echo "!				comcast, comcast.com, host-01.sys.comcast.net, host-01, etc."
+	echo "! "
+	echo "! 		DNS checks: (e.g. \"dns\")"
+	echo "! "
+	echo "! 		Specific DNS servers: 8.8.8.8, etc."
+	echo "! "
+	echo "! --traceroute Display a traceroute from any check which fails connectivity"
+	echo "! "
+	echo "! --traceroute-force Force a traceout even if connectivity passes"
+	echo "! "
+	echo "! --tcp-traceroute Display a TCP traceroute from any check which fails connectivity"
+	echo "! "
+	echo "! --tcp-traceroute-force Force TCP traceroute even if connectivity passes"
+	echo "! "
+	exit 1
+
+} # End of printSyntax()
+
+
+#
+# Should we skip this line?
+#
+function skipLine() {
+
+	LINE=$1
+
+	#
+	# Skip blank lines
+	#
+	if test ! -n "$LINE"
+	then
+		echo true
+	fi
+
+	#
+	# Skip comments
+	#
+	if test ${LINE:0:1} == "#"
+	then
+		echo true
+	fi
+
+} # End of skipLine()
+
+
+#
+# Check to see if this string contains a range
+#
+function isRange() {
+
+	STR=$1
+	
+	if [[ "$STR" =~ \[.*-.*\] ]]
+	then
+		echo true
+	fi
+
+} # End of isRange()
+
+
+#
+# This function takes a string with a range specification, and returns the range.
+#
+function getRange() {
+
+	STR=$1
+
+	IFS="[" read -r -a FIELDS <<< "$STR"
+	PREFIX=${FIELDS[0]}
+
+	IFS="]" read -r -a FIELDS <<< "${FIELDS[1]}"
+	SUFFIX=${FIELDS[1]}
+
+	IFS="-" read -r -a RANGE <<< "${FIELDS[0]}"
+	RANGE_START=${RANGE[0]}
+	RANGE_END=${RANGE[1]}
+
+	for I in $(seq -w $RANGE_START $RANGE_END)
+	do
+		HOST="${PREFIX}${I}${SUFFIX}"
+		echo $HOST
+	done
+
+} # End of getRange()
+
+
+#
+# Determine if the current line is filtered or not.
+# The matching is simply checking for a substring 
+# in a string, nothing fancy!
+#
+function isFiltered() {
+
+	LINE=$1
+	FILTER=$2
+	if test "$FILTER" != ""
+	then
+		if [[ ! "$LINE" =~ .*$FILTER.* ]]
+		then
+			echo true
+		fi
+	fi
+
+} # End of isFiltered()
+
+
+#
+# Process a single file
+#
+function processFile() {
+
+	FILE=$1
+
+	OLDIFS=$IFS
+	IFS=$'\r\n'
+	for LINE in $(cat $FILE)
+	do
+
+		if test "$(skipLine $LINE)" != ""
+		then
+			continue
+		fi
+
+		if test "$(isFiltered $LINE $FILTER)"
+		then
+			continue
+		fi
+
+		#
+		# Break our line apart on colon delimiters without spawning 
+		# a subshell every time.
+		#
+		IFS=":" read -r -a FIELDS <<< "$LINE"
+
+		SRC=${FIELDS[0]}
+		DEST=${FIELDS[1]}
+		PORT=${FIELDS[2]}
+		EXTRA=${FIELDS[3]}
+
+		#
+		# Parse out our tag.
+		# Note that since tag won't be the 
+		#
+		TAG=""
+		if [[ "$SRC" =~ .*/.* ]]
+		then
+			IFS="/" read -r -a FIELDS <<< "$SRC"
+			TAG=${FIELDS[0]}
+			SRC=${FIELDS[1]}
+
+		fi
+
+		if test "$TAG"
+		then
+			TAG="${TAG}: "
+		else
+			TAG=""
+		fi
+
+		if test "$(isRange $SRC)" != ""
+		then
+			RANGE_HOSTS=$(getRange $SRC)
+			IFS=$OLDIFS
+
+			for HOST in $(echo $RANGE_HOSTS)
+			do
+				testPath "$HOST" "$DEST" "$PORT" "$TAG" "$EXTRA"
+			done
+
+		elif test "$(isRange $DEST)" != ""
+		then
+			RANGE_HOSTS=$(getRange $DEST)
+			IFS=$OLDIFS
+
+			for HOST in $(echo $RANGE_HOSTS)
+			do
+				testPath "$SRC" "$HOST" "$PORT" "$TAG" "$EXTRA"
+			done
+
+		else
+			testPath "$SRC" "$DEST" "$PORT" "$TAG" "$EXTRA"
+
+		fi
+
+	done
+
+	IFS=$OLDIFS
+	
+} # End of processFile()
+
+
+if test ! "$1"
+then
+	printSyntax
+fi
+
+
+#
+# Loop through our arguments and get files and filters
+#
+while test "$1"
+do
+	ARG=$1
+	ARG_NEXT=$2
+	shift
+
+	if test "$ARG" == "--filter"
+	then
+		FILTER=$ARG_NEXT
+		shift
+
+	elif test "$ARG" == "--traceroute"
+	then
+		TRACEROUTE=1
+
+	elif test "$ARG" == "--traceroute-force"
+	then
+		TRACEROUTE_FORCE=1
+
+	elif test "$ARG" == "--tcp-traceroute"
+	then
+		TCP_TRACEROUTE=1
+
+	elif test "$ARG" == "--tcp-traceroute-force"
+	then
+		TCP_TRACEROUTE_FORCE=1
+
+	else
+		if test ! -f "$ARG"
+		then
+			echo "! "
+			echo "! $0: Unable to load rules file '$ARG'!"
+			echo "! "
+			exit 1
+		fi
+		FILES="${FILES} $ARG"
+
+	fi
+
+done
+
+
+#
+# Now loop through our rules files and process each one
+#
+for FILE in $FILES
+do
+
+	echo "# "
+	echo "# Processing rules in file '$FILE' with TCP timeout of ${TIMEOUT} seconds..."
+	if test "$FILTER"
+	then
+		echo "#"
+		echo "# Filter: $FILTER"
+	fi
+	echo "# "
+
+	processFile $FILE
+
+	#
+	# If there are no passes, change the color to red, otherwise
+	# if there are no failures, change their color to green.
+	#
+	if test "$STATS_SSH_SUCCESS" == 0
+	then
+		STATS_SSH_SUCCESS="${RED}ZERO"
+
+	else
+		if test "$STATS_SSH_FAIL" == 0
+		then
+			STATS_SSH_FAIL="${GREEN}ZERO"
+		fi
+
+	fi
+
+	if test "$STATS_SUCCESS" == 0
+	then
+		STATS_SUCCESS="${RED}ZERO"
+
+	else
+		if test "$STATS_FAIL" == 0
+		then
+			STATS_FAIL="${GREEN}ZERO"
+		fi
+	fi
+
+	echo "# "
+	echo -e "# Successful Hosts for '$FILE': ${GREEN}${STATS_SSH_SUCCESS}${NC}"
+	echo -e "# Failed Hosts for '$FILE': ${RED}${STATS_SSH_FAIL}${NC}"
+	echo -e "# Successful Connections for '$FILE': ${GREEN}${STATS_SUCCESS}${NC}"
+	echo -e "# Failed Connections for '$FILE: ${RED}${STATS_FAIL}${NC}"
+	echo "# "
+
+	STATS_SSH_SUCCESS=0
+	STATS_SSH_FAIL=0
+	STATS_SUCCESS=0
+	STATS_FAIL=0
+
+done
+
+
+#
+# If there are no passes, change the color to red, otherwise
+# if there are no failures, change their color to green.
+#
+if test "$STATS_TOTAL_SSH_SUCCESS" == 0
+then
+	STATS_TOTAL_SSH_SUCCESS="${RED}ZERO"
+
+else
+	if test "$STATS_TOTAL_SSH_FAIL" == 0
+	then
+		STATS_TOTAL_SSH_FAIL="${GREEN}ZERO"
+	fi
+fi
+
+if test "$STATS_TOTAL_SUCCESS" == 0
+then
+	STATS_TOTAL_SUCCESS="${RED}ZERO"
+
+else
+	if test "$STATS_TOTAL_FAIL" == 0
+	then
+		STATS_TOTAL_FAIL="${GREEN}ZERO"
+	fi
+fi
+
+echo "# "
+echo -e "# Total Successful Hosts: ${GREEN}${STATS_TOTAL_SSH_SUCCESS}${NC}"
+echo -e "# Total Failed Hosts: ${RED}${STATS_TOTAL_SSH_FAIL}${NC}"
+echo -e "# Total Successful Connections: ${GREEN}${STATS_TOTAL_SUCCESS}${NC}"
+echo -e "# Total Failed Connections: ${RED}${STATS_TOTAL_FAIL}${NC}"
+echo "# "
+
