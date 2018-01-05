@@ -16,7 +16,7 @@ Next, if you want to help out, do the following:
 
 Once your PR is issued, we will review your work and decide on adding it to the project!
 
-Need ideas on what to contribute?  Please check out [our TODO list](TODO).
+Need ideas on what to contribute?  Please check out [our TODO list](TODO.md).
 
 For more details about contributing to GitHub projects see
 http://gun.io/blog/how-to-github-fork-branch-and-pull-request/
