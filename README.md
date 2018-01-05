@@ -194,6 +194,10 @@ Testing can be done via docker, simply cd into the `testing/` directory and
 run the script `go.sh`.  This will spin up some docker containers, and test
 the app from inside them.
 
+## TODO
+
+[Our TODO List](TODO.md)
+
 
 
 
