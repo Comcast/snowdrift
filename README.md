@@ -45,7 +45,7 @@ target host.  It will then report the results back to you.
 
 ## Usage
 
-`./firewall-rule-test [ --filter string ] rules-file [ rules-file [ ... ] ] [ --traceroute ] [ --tcp-traceroute ] [ --traceroute-force ] [ --tcp-traceroute-force ]`
+`./snowdrift [ --filter string ] rules-file [ rules-file [ ... ] ] [ --traceroute ] [ --tcp-traceroute ] [ --traceroute-force ] [ --tcp-traceroute-force ]`
 
 - `--filter` - Can be any string--it is filtered against the raw strings in the rules files, and only matching strings will be processed.
 - `--traceroute` - When a connection fails, a traceroute to the target host will be printed
@@ -59,7 +59,7 @@ target host.  It will then report the results back to you.
 To run the demo, make sure that SSH is enabled on the machine you are testing on
 and run:
 
-`./firewall-rule-test ./rules/demo.txt`
+`./snowdrift ./rules/demo.txt`
 
 This will run several tests against your own machine for connectivity to 
 places like Google (you can access Google, right?) and some tests which
@@ -70,7 +70,7 @@ are designed to fail.
 
 From a sample run:
 
-<img src="./img/firewall-rule-testing-sample-run.png" />
+<img src="./img/snowdrift-sample-run.png" />
 
 
 
