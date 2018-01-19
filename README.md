@@ -90,108 +90,69 @@ places like Google (you can access Google, right?) and some tests which
 are designed to fail.
 
 
-## Rules Files
-
-Comments begin with `#`.
-
-Empty lines are acceptable.
-
-
-### Rules Format (TCP)
-
-This is the format for testing an arbitrary TCP port:
-
-`[tag/]$source_host:$dest_host:$tcp_port`
-
-This script will SSH to the source host, then use netcat to check the TCP port of the destination host.
-This script will report whether the attempt succeeded, timed out, or whether the connection 
-was refused.  In the case of a refused connection, that is still treated as a "success", because
-that means the network path to the target machine is very likely fine, it's just that the
-service isn't running on said machine (or iptables is blocking it).
-
-`tag` is used to tag a rule or series of rules to make filtering easier.
-
-
-### Rules Format (DNS)
-
-The syntax for testing DNS servers is similar:
-
-`[tag/]$source_host:[$dns_server]:dns:[$hostname]`
-
-`$dns_server` should be the hostname or IP of a DNS server to test.  If left blank, the
-default server(s) in `/etc/resolv.conf` will be used instead. 
-
-`dns` is a string that is used instead of a TCP port number.
-
-`$hostname` is the DNS query to send.  It defaults to `google.com` if not specified.
-
-The script will report on whether the DNS query was successful.  If a DNS query results in NXDOMAIN
-it is still treated as successful because that means there is network connectivity to the DNS server.
-
-`tag` is used to tag a rule or series of rules to make filtering easier.
-
-
-### Sample Rules
-
-Test SSH access to a specific host:
+## Sample Rules File
 
 ```
+#
+# Comments start with a hashmark
+#
+
+#
+# Test SSH access to a specific host:
+#
 splunk-01.sys.comcast.net:splunk-deploy.sys.comcast.net:22
-```
 
-Make sure Splunk can talk to our target host:
+#
+# Make sure Splunk can talk to our Deployment Server in port 8089.
+#
+# Note the "splunk-deploy/" part at the beginning--that is a tag which
+# can then be filtered on.
+#
+splunk-deploy/splunk-01.sys.comcast.net:splunk-deploy.sys.comcast.net:8089
 
-```
-splunk-01.sys.comcast.net:splunk-deploy.sys.comcast.net:8089
-```
+#
+# Make sure a range of Splunk hosts talk to our Deployment Server on port 8089.
+#
+splunk-deploy/splunk-[01-80].sys.comcast.net:splunk-deploy.sys.comcast.net:8089
 
-Make sure a **range of Splunk hosts** can talk to our target host:
+#
+# Make sure Splunk host can talk to a range of target hosts over SSH.
+#
+splunk-01.sys.comcast.net:backups-s3-as-a-[01-20].da.comcast.net:22
 
-```
-splunk-[01-80].sys.comcast.net:splunk-deploy.sys.comcast.net:8089
-```
-
-Make sure Splunk host can talk to **a range of target hosts**:
-
-```
-splunk-01.sys.comcast.net:backups-s3-as-a-[01-20].da.comcast.net:8089
-```
-
-Test a DNS query to the default server on a host:
-
-```
+#
+# Test a DNS query to the default server on a host:
+#
 splunk-01.sys.comcast.net::dns
-```
 
-Test a DNS query to one of our DNS servers:
-
-```
+#
+# Test a DNS query to one of our DNS servers:
+# Note the use of "dns" instead of a port number.
+#
 splunk-01.sys.comcast.net:69.252.80.80:dns
-```
 
-Test a DNS query to one of our DNS servers with a specific query:
-
-```
+#
+# Test a DNS query to one of our DNS servers with a specific query:
+# Note the extra argument after "dns" which is the query to send.
+#
 splunk-01.sys.comcast.net:69.252.81.81:dns:comcast.com
-```
 
-The same, but with an NXDOMAIN:
-
-```
+#
+# The same, but with an NXDOMAIN:
+#
 splunk-01.sys.comcast.net:69.252.81.81:dns:bad-dns.comcast.com
-```
 
-This will time out:
-
-```
+#
+# This will time out:
+#
 splunk-01.sys.comcast.net:10.1.2.3:dns:comcast.com
-```
 
-The first test will fail to reach the source host, the second test will not run because state is kept:
-
-```
+#
+# The first test will fail to reach the source host, the second test will not run because state is kept:
+#
 10.1.2.2:69.252.80.80:dns
 10.1.2.2:69.252.80.81:dns:cnn.com
+
 ```
 
 
