@@ -9,8 +9,10 @@ Turn this:
 
 ```
 $ ssh fw-test-01.da.comcast.net
-$ nc -vz github.comcast.cm 22 # Oops, I made a typo!^C
-$ nc -vz gthub.comcast.com 22 # Oops, I made another typo, because I keep running these tests by hand!
+$ nc -vz github.comcast.cm 22 ^C
+# Oops, I made a typo!
+$ nc -vz gthub.comcast.com 22 ^C
+# Oops, I made another typo, because I keep running these tests by hand!
 ```
 
 Into this:
