@@ -23,7 +23,12 @@ Into this:
 
 This is unit testing for firewall rules. It will change your workflow for the better.
 
-In a firewall heavy environment, being able to test and validate your firewall rules is essential.  
+**Suggested usage:**
+- Create a rules file with the network paths you need working.
+- Work on firewall rules and/or iptables.
+- Run Snowdrift against the rules file to check your network paths.
+- Repeat the previous two steps until all tests pass.
+- That's it, you're done!
 
 This utility aims to automate that by having "rules files" which this script then procesess
 and will SSH into each machine and try connecting to the target host on the specified port.
