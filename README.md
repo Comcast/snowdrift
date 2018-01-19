@@ -24,6 +24,7 @@ Into this:
 This is unit testing for firewall rules. It will change your workflow for the better.
 
 **Suggested usage:**
+- Fork this repo so that you can put rules files you create into the `rules/` folder and save the changes to your own repo.
 - Create a rules file with the network paths you need working.
 - Work on firewall rules and/or iptables.
 - Run Snowdrift against the rules file to check your network paths.
