@@ -1,8 +1,25 @@
-# Snowdrift: Firewall Rule Testing
-
 <img src="./img/snowdrift.png" align="right" />
 
-TL;DR This is unit testing for firewall rules. It will change your workflow for the better.
+# Snowdrift: Firewall Rule Testing
+
+
+## TL;DR
+
+Turn this:
+
+```
+$ ssh fw-test-01.da.comcast.net
+$ nc -vz github.comcast.cm 22 # Oops, I made a typo!^C
+$ nc -vz gthub.comcast.com 22 # Oops, I made another typo, because I keep running these tests by hand!
+```
+
+Into this:
+
+<img src="./img/snowdrift-sample-run.png" />
+
+## Details
+
+This is unit testing for firewall rules. It will change your workflow for the better.
 
 In a firewall heavy environment, being able to test and validate your firewall rules is essential.  
 
@@ -64,14 +81,6 @@ and run:
 This will run several tests against your own machine for connectivity to 
 places like Google (you can access Google, right?) and some tests which
 are designed to fail.
-
-
-## Screenshots
-
-From a sample run:
-
-<img src="./img/snowdrift-sample-run.png" />
-
 
 
 ## Rules Files
