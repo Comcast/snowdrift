@@ -512,6 +512,10 @@ function printSyntax() {
 	echo "! "
 	echo "! --tcp-traceroute-force Force TCP traceroute even if connectivity passes"
 	echo "! "
+	echo "! "
+	echo "! Source and documentation available at: https://github.com/Comcast/snowdrift "
+	echo "! "
+	echo "! "
 	exit 1
 
 } # End of printSyntax()
@@ -738,6 +742,13 @@ do
 	fi
 
 done
+
+
+echo "# "
+echo "# Welcome to Snowdrift!"
+echo "# "
+echo "# Source and documentation can be found at https://github.com/Comcast/snowdrift"
+echo "# "
 
 
 #
