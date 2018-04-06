@@ -729,6 +729,10 @@ do
 	then
 		TCP_TRACEROUTE_FORCE=1
 
+	elif test "$ARG" == "-h" -o "$ARG" == "--help"
+	then
+		printSyntax
+
 	else
 		if test ! -f "$ARG"
 		then
