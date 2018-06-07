@@ -19,6 +19,15 @@ Into this:
 
 <img src="./img/snowdrift-sample-run.png" />
 
+
+## Installation
+
+```
+brew tap comcast/opensource git@github.com:Comcast/homebrew-opensource.git
+brew install snowdrift
+```
+
+
 ## Details
 
 This is unit testing for firewall rules. It will change your workflow for the better.
@@ -38,14 +47,6 @@ By writing and saving rules file, you now have **unit test-like ability for test
 After changes are made, you can use this script to **verify correctness of firewall operation**, as opposed
 to having to SSH to different machines by hand, run netcat manually, and then run Traceroute manually
 to send back to the firewall team.
-
-
-## Installation
-
-```
-brew tap comcast/opensource git@github.com:Comcast/homebrew-opensource.git
-brew install snowdrift
-```
 
 
 ## Features
