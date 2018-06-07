@@ -40,6 +40,14 @@ to having to SSH to different machines by hand, run netcat manually, and then ru
 to send back to the firewall team.
 
 
+## Installation
+
+```
+brew tap comcast/opensource git@github.com:Comcast/homebrew-opensource.git
+brew install snowdrift
+```
+
+
 ## Features
 
 - Test TCP connectivity from any host you can SSH to to any other target host
