@@ -23,7 +23,7 @@ Into this:
 ## Installation
 
 ```
-brew tap comcast/opensource git@github.com:Comcast/homebrew-opensource.git
+brew tap comcast/opensource https://github.com/Comcast/homebrew-opensource.git
 brew install snowdrift
 ```
 
