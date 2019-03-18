@@ -663,38 +663,35 @@ function processFile() {
 
 		if test "$(isRange $SRC)" != ""
 		then
-			RANGE_HOSTS=$(getRange $SRC)
-			IFS=$OLDIFS
+			RANGE_SRC=$(getRange $SRC)
+		else
+			RANGE_SRC="$SRC"
+		fi
 
-			for HOST in $(echo $RANGE_HOSTS)
-			do
-				testPath "$HOST" "$DEST" "$PORT" "$TAG" "$EXTRA"
-			done
-
-		elif test "$(isRange $DEST)" != ""
+		if test "$(isRange $DEST)" != ""
 		then
-			RANGE_HOSTS=$(getRange $DEST)
-			IFS=$OLDIFS
+			RANGE_DEST=$(getRange $DEST)
+		else
+			RANGE_DEST="$DEST"
+		fi
 
-			for HOST in $(echo $RANGE_HOSTS)
-			do
-				testPath "$SRC" "$HOST" "$PORT" "$TAG" "$EXTRA"
-			done
-
-		elif test "$(isRange $PORT)" != ""
+		if test "$(isRange $PORT)" != ""
 		then
 			RANGE_PORTS=$(getRange $PORT)
-			IFS=$OLDIFS
-
-			for PORT in $(echo $RANGE_PORTS)
-			do
-				testPath "$SRC" "$HOST" "$PORT" "$TAG" "$EXTRA"
-			done
-
 		else
-			testPath "$SRC" "$DEST" "$PORT" "$TAG" "$EXTRA"
-
+			RANGE_PORTS="$PORT"
 		fi
+
+		for SRC in ${RANGE_SRC[@]}
+		do
+			for DEST in ${RANGE_DEST[@]}
+			do
+				for PORT in ${RANGE_PORTS[@]}
+				do
+					testPath "$SRC" "$DEST" "$PORT" "$TAG" "$EXTRA"
+				done
+			done
+		done
 
 	done
 
