@@ -181,6 +181,13 @@ Testing can be done via docker, simply cd into the `testing/` directory and
 run the script `go.sh`.  This will spin up some docker containers, and test
 the app from inside them.
 
+
+## Development
+
+- To build and get into the `testing` container:
+  - `docker-compose kill testing; docker-compose rm -f testing; docker-compose build; docker-compose up -d testing; docker-compose exec testing bash`
+
+
 ## TODO
 
 [Our TODO List](TODO.md)

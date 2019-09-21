@@ -1,0 +1,38 @@
+
+version: '3'
+
+services:
+
+  #
+  # Get into this container with:
+  #
+  # docker-compose exec testing sh
+  #
+  testing:
+    build:
+      context: .
+      dockerfile: docker-files/Dockerfile-testing
+    volumes:
+      - ./docker-files/dummy-ssh-keys/testing.key:/testing.key
+      - ./docker-files/testing-ssh-config:/root/.ssh/config
+      - ./docker-files/testing-motd:/etc/motd
+
+  source:
+    # 
+    # Docs for this excelennt container available at:
+    # 
+    # https://github.com/panubo/docker-sshd
+    # 
+    image: docker.io/panubo/sshd:1.0.3 
+
+    volumes:
+      - ./docker-files/dummy-ssh-keys/testing.pub:/root/.ssh/authorized_keys
+
+    environment:
+      - SSH_ENABLE_ROOT=true
+
+
+  #dest-accept:
+  #dest-reject:
+  #dest-timeout:
+
