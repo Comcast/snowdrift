@@ -185,7 +185,9 @@ the app from inside them.
 ## Development
 
 - To build and get into the `testing` container:
-  - `docker-compose kill testing; docker-compose rm -f testing; docker-compose build; docker-compose up -d testing; docker-compose exec testing bash`
+  - `./bin/dev-testing`
+- To build and start the `source` container`
+  - `./bin/dev-source`
 
 
 ## TODO

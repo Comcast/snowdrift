@@ -1,0 +1,19 @@
+#!/bin/bash
+#
+# This script is used to build the source container.
+#
+
+# Errors are fatal
+set -e
+
+pushd $(dirname $0) > /dev/null
+
+echo "# "
+echo "# Building and executing source container..."
+echo "# "
+docker-compose kill source
+docker-compose rm -f source
+docker-compose build source
+docker-compose up -d source
+
+
