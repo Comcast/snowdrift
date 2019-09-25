@@ -23,16 +23,14 @@ services:
     # 
     # https://github.com/panubo/docker-sshd
     # 
-    image: docker.io/panubo/sshd:1.0.3 
+    build:
+      context: .
+      dockerfile: docker-files/Dockerfile-source
 
     volumes:
       - ./docker-files/dummy-ssh-keys/testing.pub:/root/.ssh/authorized_keys
+      - ./docker-files/source-motd:/etc/motd
 
     environment:
       - SSH_ENABLE_ROOT=true
-
-
-  #dest-accept:
-  #dest-reject:
-  #dest-timeout:
 
