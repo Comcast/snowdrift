@@ -1,0 +1,20 @@
+#!/bin/bash
+#
+# This script is used to build the source container.
+#
+
+# Errors are fatal
+set -e
+
+pushd $(dirname $0) > /dev/null
+
+echo "# "
+echo "# Building and executing dest-accept container..."
+echo "# "
+docker-compose kill dest-accept
+docker-compose rm -f dest-accept
+docker-compose build dest-accept
+docker-compose up -d dest-accept
+docker-compose exec dest-accept bash
+
+

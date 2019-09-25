@@ -7,9 +7,6 @@ FROM alpine
 RUN apk add openssh bash && \
 	echo "cat /etc/motd" >> /root/.bashrc
 
-#COPY testing-ssh-config /root/.ssh/config
-#COPY testing-motd /etc/motd
-
 #
 # This container isn't doing anything, other than being connected to
 # via a "docker exec" command.

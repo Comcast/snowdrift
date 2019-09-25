@@ -19,7 +19,7 @@ services:
 
   source:
     # 
-    # Docs for this excelennt container available at:
+    # Docs for this excelent container available at:
     # 
     # https://github.com/panubo/docker-sshd
     # 
@@ -33,4 +33,12 @@ services:
 
     environment:
       - SSH_ENABLE_ROOT=true
+
+  dest-accept: 
+    build:
+      context: .
+      dockerfile: docker-files/Dockerfile-dest-accept
+
+    volumes:
+      - ./docker-files/dest-accept-motd:/etc/motd
 
