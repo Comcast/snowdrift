@@ -13,6 +13,7 @@ services:
       context: .
       dockerfile: docker-files/Dockerfile-testing
     volumes:
+      - .:/mnt
       - ./docker-files/dummy-ssh-keys/testing.key:/testing.key
       - ./docker-files/testing-ssh-config:/root/.ssh/config
       - ./docker-files/testing-motd:/etc/motd
@@ -28,6 +29,7 @@ services:
       dockerfile: docker-files/Dockerfile-source
 
     volumes:
+      - .:/mnt
       - ./docker-files/dummy-ssh-keys/testing.pub:/root/.ssh/authorized_keys
       - ./docker-files/source-motd:/etc/motd
 
@@ -39,6 +41,11 @@ services:
       context: .
       dockerfile: docker-files/Dockerfile-dest-accept
 
+    cap_add:
+      - NET_ADMIN
+
     volumes:
+      - .:/mnt
       - ./docker-files/dest-accept-motd:/etc/motd
+      - ./docker-files/dest-accept-nginx-default.conf:/etc/nginx/conf.d/default.conf
 

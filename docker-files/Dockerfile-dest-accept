@@ -1,7 +1,7 @@
 
 FROM alpine
 
-RUN apk add bash nginx && \
+RUN apk add bash nginx iptables && \
 	mkdir -p /run/nginx/ && \
 	echo "cat /etc/motd" >> /root/.bashrc
 
