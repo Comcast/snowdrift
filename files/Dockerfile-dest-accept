@@ -8,7 +8,8 @@ RUN apk add bash nginx iptables && \
 #
 # Run nginx in the foreground.
 #
-ENTRYPOINT nginx -g 'daemon off;'
+#ENTRYPOINT nginx -g 'daemon off;'
+ENTRYPOINT /mnt/files/dest-accept-entrypoint.sh
 
 
 

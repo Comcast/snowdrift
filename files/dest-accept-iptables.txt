@@ -1,0 +1,15 @@
+*filter
+:INPUT ACCEPT [0:0]
+:FORWARD ACCEPT [0:0]
+:OUTPUT ACCEPT [0:0]
+-A INPUT -p tcp -m tcp --dport 440 -j DROP
+-A INPUT -p tcp -m tcp --dport 441 -j DROP
+-A INPUT -p tcp -m tcp --dport 442 -j DROP
+-A INPUT -p tcp -m tcp --dport 443 -j DROP
+-A INPUT -p tcp -m tcp --dport 444 -j DROP
+-A INPUT -p tcp -m tcp --dport 445 -j DROP
+-A INPUT -p tcp -m tcp --dport 446 -j DROP
+-A INPUT -p tcp -m tcp --dport 447 -j DROP
+-A INPUT -p tcp -m tcp --dport 448 -j DROP
+-A INPUT -p tcp -m tcp --dport 449 -j DROP
+COMMIT
