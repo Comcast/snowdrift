@@ -10,7 +10,7 @@ set -e
 #
 # Load our iptables rules
 #
-iptables-restore < /mnt/files/dest-accept-iptables.txt
+iptables-restore < /mnt/files/dest-iptables.txt
 
 #
 # Start nginx in the foreground.

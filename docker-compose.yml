@@ -36,16 +36,18 @@ services:
     environment:
       - SSH_ENABLE_ROOT=true
 
-  dest-accept: 
+  dest01: 
     build:
       context: .
-      dockerfile: files/Dockerfile-dest-accept
+      dockerfile: files/Dockerfile-dest
 
     cap_add:
       - NET_ADMIN
 
     volumes:
       - .:/mnt
-      - ./files/dest-accept-motd:/etc/motd
-      - ./files/dest-accept-nginx-default.conf:/etc/nginx/conf.d/default.conf
+      - ./files/dest-motd:/etc/motd
+      - ./files/dest-nginx-default.conf:/etc/nginx/conf.d/default.conf
+
+
 

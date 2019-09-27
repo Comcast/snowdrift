@@ -1,0 +1,5 @@
+#####
+#
+# Welcome to the "dest-accept" container!
+# This container runs nginx to accept conncetions and listens on some well-known ports.
+#
