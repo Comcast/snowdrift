@@ -177,9 +177,9 @@ The following environment variables can be set to output debugging info:
 
 ## Testing
 
-Testing can be done via docker, simply cd into the `testing/` directory and
-run the script `go.sh`.  This will spin up some docker containers, and test
-the app from inside them.
+Run `./test.sh`.  It will spin up multiple Docker containers with Docker Compose
+and run a series of tests.  The values will then be checked expect their expected
+values and results will be output indicating success or failure.
 
 
 ## Development
