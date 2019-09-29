@@ -7,10 +7,6 @@ FROM alpine
 RUN apk add openssh bash && \
 	echo "cat /etc/motd" >> /root/.bashrc
 
-#
-# This container isn't doing anything, other than being connected to
-# via a "docker exec" command.
-#
-ENTRYPOINT /bin/sleep 999999
+ENTRYPOINT /mnt/files/testing-entrypoint.sh
 
 
