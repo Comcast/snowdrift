@@ -181,6 +181,10 @@ Run `./test.sh`.  It will spin up multiple Docker containers with Docker Compose
 and run a series of tests.  The values will then be checked expect their expected
 values and results will be output indicating success or failure.
 
+Output from a successful testing run:
+
+<img src="./img/snowdrift-tests.png"  />
+
 
 ## Development
 
