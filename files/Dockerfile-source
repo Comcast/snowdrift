@@ -6,7 +6,7 @@ FROM docker.io/panubo/sshd:1.0.3
 
 # Add bash and netcat
 RUN apk update \
-	&& apk add bash netcat-openbsd
+	&& apk add bash
 
 # No need for an ENTRYPOINT, as the source Docker image provides one.
 

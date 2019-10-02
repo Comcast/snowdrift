@@ -6,4 +6,10 @@ source:dest01:441
 source:dest01:450
 source:dest01:451
 
+source-netcat-openbsd:dest01:80
+source-netcat-openbsd:dest01:81
+source-netcat-openbsd:dest01:440
+source-netcat-openbsd:dest01:441
+source-netcat-openbsd:dest01:450
+source-netcat-openbsd:dest01:451
 

@@ -84,10 +84,10 @@ TOTAL_CONNS_SUCCESS=$(getMetric "Total Successful Connections: ")
 TOTAL_CONNS_FAILED=$(getMetric "Total Failed Connections: ")
 
 
-compareValues "Total Hosts Successful" $TOTAL_HOSTS_SUCCESS "1"
+compareValues "Total Hosts Successful" $TOTAL_HOSTS_SUCCESS "2"
 compareValues "Total Hosts Failed" $TOTAL_HOSTS_FAILED "ZERO"
-compareValues "Total Connections Successful" $TOTAL_CONNS_SUCCESS "4"
-compareValues "Total Connections Failed" $TOTAL_CONNS_FAILED "2"
+compareValues "Total Connections Successful" $TOTAL_CONNS_SUCCESS "6"
+compareValues "Total Connections Failed" $TOTAL_CONNS_FAILED "6"
 
 
 echo "# Done!"
