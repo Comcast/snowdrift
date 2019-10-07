@@ -64,10 +64,29 @@ function compareValues() {
 # Change to this script's directory
 pushd $(dirname $0) > /dev/null
 
+#
+# How many containers do we have?
+#
+NUM=$(docker-compose ps |grep snowdrift |grep " Up " | wc -l | awk '{print $1}')
+
+echo "# Current running containers: ${NUM}"
+
 echo "# "
 echo "# Starting up Docker containers..."
 echo "# "
 docker-compose up -d
+
+NUM2=$(docker-compose ps |grep snowdrift |grep " Up " | wc -l | awk '{print $1}')
+
+if test "$NUM" != "$NUM2"
+then
+	echo "# "
+	echo "# Some containers were started (${NUM2} != ${NUM}),"
+	echo "# so let's sleep for 10 seconds so everything spins up..."
+	sleep 10
+	echo "# ...continuing!"
+	echo "# "
+fi
 
 echo "# "
 echo "# Running Snowdrift tests..."
