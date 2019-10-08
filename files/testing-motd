@@ -3,7 +3,9 @@
 # Welcome to the Snowdrift testing container!
 #
 #
-# To test connectivty to the source container:
+# To test connectivty to the source containers:
 #
 #	ssh source
+#	ssh source-netcat-openbsd
+#	ssh source-centos
 #

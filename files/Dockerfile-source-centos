@@ -1,0 +1,16 @@
+
+#
+# Built from https://hub.docker.com/r/jdeathe/centos-ssh/
+#
+#FROM jdeathe/centos-ssh:2.6.1
+FROM centos:8
+
+#
+# Based on some instructions found at https://gist.github.com/pokle/10808069
+#
+RUN yum install -y openssh-server nmap-ncat && \
+	ssh-keygen -t rsa -f /etc/ssh/ssh_host_rsa_key -N '' && \
+	ssh-keygen -t dsa -f /etc/ssh/ssh_host_dsa_key -N ''
+
+CMD /usr/sbin/sshd -D
+

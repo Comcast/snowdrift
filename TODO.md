@@ -2,6 +2,8 @@
 # TODO List: Items still needing help
 
 - Any other versions of Netcat out there?
+   - X CentOS
+   - Ubuntu
 - Add ranges into test
 - Come up with a way to test UDP port 123 for NTP
 - Add support for testing that paths **do** time out, and mark them as "success"

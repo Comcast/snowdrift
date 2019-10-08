@@ -1,0 +1,19 @@
+#!/bin/bash
+#
+# This script is used to build the source CentOS container.
+#
+
+# Errors are fatal
+set -e
+
+pushd $(dirname $0) > /dev/null
+
+echo "# "
+echo "# Building and executing source CentOS container..."
+echo "# "
+docker-compose kill source-centos
+docker-compose rm -f source-centos
+docker-compose build source-centos
+docker-compose up -d source-centos
+
+
