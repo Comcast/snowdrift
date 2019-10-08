@@ -402,7 +402,7 @@ function testPath() {
 
 			IS_OPENBSD=\`\$NETCAT -h 2>&1 | head -n3 | grep OpenBSD\`
 
-			#echo "Netcat DEBUG: ${NETCAT} ${TIMEOUT} ${DEST} ${PORT} OPENBSD=\${IS_OPENBSD}"
+			#echo "Netcat DEBUG: ${NETCAT} ${TIMEOUT} ${DEST} ${PORT} OPENBSD=\${IS_OPENBSD}"; exit 1
 
 			if test "\$IS_OPENBSD"
 			then
