@@ -68,7 +68,6 @@ pushd $(dirname $0) > /dev/null
 # How many containers do we have?
 #
 NUM=$(docker-compose ps |grep snowdrift |grep " Up " | wc -l | awk '{print $1}')
-
 echo "# Current running containers: ${NUM}"
 
 echo "# "
@@ -77,6 +76,7 @@ echo "# "
 docker-compose up -d
 
 NUM2=$(docker-compose ps |grep snowdrift |grep " Up " | wc -l | awk '{print $1}')
+echo "# Current running containers: ${NUM2}"
 
 if test "$NUM" != "$NUM2"
 then
