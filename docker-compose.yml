@@ -62,10 +62,6 @@ services:
       - ./files/source-centos-motd:/etc/motd
       - ./files/source-centos-sshd-config:/etc/ssh/sshd_config:ro
 
-# TODO: Delete?
-    environment:
-      - SSH_ENABLE_ROOT=true
-
   source-ubuntu:
 
     build:
@@ -78,10 +74,6 @@ services:
       - ./files/source-ubuntu-motd:/etc/motd
       - ./files/source-centos-sshd-config:/etc/ssh/sshd_config:ro
 
-# TODO: Delete?
-    environment:
-      - SSH_ENABLE_ROOT=true
-
   source-ubuntu-openbsd:
 
     build:
@@ -93,11 +85,6 @@ services:
       - ./files/dummy-ssh-keys/testing.pub:/root/.ssh/authorized_keys
       - ./files/source-ubuntu-openbsd-motd:/etc/motd
       - ./files/source-centos-sshd-config:/etc/ssh/sshd_config:ro
-
-# TODO: Delete?
-    environment:
-      - SSH_ENABLE_ROOT=true
-
 
 
   dest01: 
@@ -112,6 +99,35 @@ services:
       - .:/mnt
       - ./files/dest-motd:/etc/motd
       - ./files/dest-nginx-default.conf:/etc/nginx/conf.d/default.conf
+
+  dest02: 
+    build:
+      context: .
+      dockerfile: files/Dockerfile-dest
+
+    cap_add:
+      - NET_ADMIN
+
+    volumes:
+      - .:/mnt
+      - ./files/dest-motd:/etc/motd
+      - ./files/dest-nginx-default.conf:/etc/nginx/conf.d/default.conf
+
+  dest03: 
+    build:
+      context: .
+      dockerfile: files/Dockerfile-dest
+
+    cap_add:
+      - NET_ADMIN
+
+    volumes:
+      - .:/mnt
+      - ./files/dest-motd:/etc/motd
+      - ./files/dest-nginx-default.conf:/etc/nginx/conf.d/default.conf
+
+
+
 
 
 

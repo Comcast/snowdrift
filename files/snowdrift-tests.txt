@@ -13,6 +13,8 @@ source-netcat-openbsd:dest01:441
 source-netcat-openbsd:dest01:450
 source-netcat-openbsd:dest01:451
 
+range/source-netcat-openbsd:dest[01-03]:80
+
 source-centos:dest01:80
 source-centos:dest01:81
 source-centos:dest01:440
