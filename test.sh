@@ -16,6 +16,21 @@ RED="\033[0;31m"
 GREEN="\033[0;32m"
 NC="\033[0m"
 
+FILTER='.*'
+if test "$1" == "-h" -o "$1" == "--help"
+then
+	echo "! "
+	echo "! Syntax: $0 [ filter ] "
+	echo "! "
+	exit 1
+
+elif test "$1"
+then
+	FILTER=$1
+	echo "# Setting filter to ${FILTER}..."
+
+fi
+
 
 #
 # Search for a string from the test results, and return the value.
@@ -95,10 +110,25 @@ echo "# "
 echo "# Running Snowdrift tests..."
 echo "# "
 TMP=$(mktemp -t snowdrift)
-docker-compose exec testing /mnt/snowdrift /mnt/files/snowdrift-tests.txt | tee $TMP
+TMP_TESTS="files/snowdrift-tests.txt.tmp"
+cat files/snowdrift-tests.txt | grep "${FILTER}" > ${TMP_TESTS} || true
+
+if test ! -s ${TMP_TESTS}
+then
+	echo "! "
+	echo "! Zero tests were returned by your filter: ${FILTER}"
+	echo "! "
+	echo "! Please check your filter and try again, or remove it to run all tests."
+	echo "! "
+	exit 1
+fi
+
+cat $TMP_TESTS
+
+docker-compose exec testing /mnt/snowdrift /mnt/${TMP_TESTS} | tee $TMP
 
 RESULTS=$(cat $TMP)
-rm -f $TMP
+rm -f $TMP $TMP_TESTS
 
 TOTAL_HOSTS_SUCCESS=$(getMetric "Total Successful Hosts: ")
 TOTAL_HOSTS_FAILED=$(getMetric "Total Failed Hosts: ")
