@@ -73,6 +73,9 @@ echo "# Current running containers: ${NUM}"
 echo "# "
 echo "# Starting up Docker containers..."
 echo "# "
+echo "# (If containers are being built for the first time, this..."
+echo "# ...could take awhile.)"
+echo "# "
 docker-compose up -d
 
 NUM2=$(docker-compose ps |grep snowdrift |grep " Up " | wc -l | awk '{print $1}')
