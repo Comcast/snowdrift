@@ -1,0 +1,21 @@
+#!/bin/bash
+#
+# This script is used to build the source Ubuntu container with OpenBSD Netcat.
+#
+
+# Errors are fatal
+set -e
+
+pushd $(dirname $0) > /dev/null
+
+echo "# "
+echo "# Building and executing source Ubuntu container (with OpenBSD Netcat)..."
+echo "# "
+docker-compose kill source-ubuntu-openbsd
+docker-compose rm -f source-ubuntu-openbsd
+docker-compose build source-ubuntu-openbsd
+docker-compose up -d source-ubuntu-openbsd
+
+echo "# Spawning a shell (you can exit and the container will still run..."
+docker-compose exec source-ubuntu-openbsd bash
+

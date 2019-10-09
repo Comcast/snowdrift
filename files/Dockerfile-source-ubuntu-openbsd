@@ -1,0 +1,18 @@
+
+FROM ubuntu:19.10
+
+#
+# Based on some instructions found at https://gist.github.com/pokle/10808069
+#
+# This first step will build a common image that this and the other Ubuntu
+# image will share and save on build time and disk space.
+#
+RUN apt-get update && \
+	apt-get install -y openssh-server && \
+	mkdir /run/sshd
+
+RUN apt-get install -y netcat-openbsd
+
+CMD /usr/sbin/sshd -D
+
+

@@ -1,9 +1,7 @@
 
 # TODO List: Items still needing help
 
-- Any other versions of Netcat out there?
-   - X CentOS
-   - Ubuntu
+- Add step to test.sh to warn about building containers...
 - Write a script that will audit all Netcat versions:
    - docker-compose exec source nc --help |head
    - Add a blurb into the README saying what Netcat versions (and OSes they are in, where appropriate) Snowdrift is guaranteed to work on.

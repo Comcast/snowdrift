@@ -16,4 +16,6 @@ docker-compose rm -f source-ubuntu
 docker-compose build source-ubuntu
 docker-compose up -d source-ubuntu
 
+echo "# Spawning a shell (you can exit and the container will still run..."
+docker-compose exec source-ubuntu bash
 

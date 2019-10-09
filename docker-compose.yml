@@ -62,8 +62,42 @@ services:
       - ./files/source-centos-motd:/etc/motd
       - ./files/source-centos-sshd-config:/etc/ssh/sshd_config:ro
 
+# TODO: Delete?
     environment:
       - SSH_ENABLE_ROOT=true
+
+  source-ubuntu:
+
+    build:
+      context: .
+      dockerfile: files/Dockerfile-source-ubuntu
+
+    volumes:
+      - .:/mnt
+      - ./files/dummy-ssh-keys/testing.pub:/root/.ssh/authorized_keys
+      - ./files/source-ubuntu-motd:/etc/motd
+      - ./files/source-centos-sshd-config:/etc/ssh/sshd_config:ro
+
+# TODO: Delete?
+    environment:
+      - SSH_ENABLE_ROOT=true
+
+  source-ubuntu-openbsd:
+
+    build:
+      context: .
+      dockerfile: files/Dockerfile-source-ubuntu-openbsd
+
+    volumes:
+      - .:/mnt
+      - ./files/dummy-ssh-keys/testing.pub:/root/.ssh/authorized_keys
+      - ./files/source-ubuntu-openbsd-motd:/etc/motd
+      - ./files/source-centos-sshd-config:/etc/ssh/sshd_config:ro
+
+# TODO: Delete?
+    environment:
+      - SSH_ENABLE_ROOT=true
+
 
 
   dest01: 

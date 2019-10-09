@@ -20,3 +20,18 @@ source-centos:dest01:441
 source-centos:dest01:450
 source-centos:dest01:451
 
+source-ubuntu:dest01:80
+source-ubuntu:dest01:81
+source-ubuntu:dest01:440
+source-ubuntu:dest01:441
+source-ubuntu:dest01:450
+source-ubuntu:dest01:451
+
+source-ubuntu-openbsd:dest01:80
+source-ubuntu-openbsd:dest01:81
+source-ubuntu-openbsd:dest01:440
+source-ubuntu-openbsd:dest01:441
+source-ubuntu-openbsd:dest01:450
+source-ubuntu-openbsd:dest01:451
+
+

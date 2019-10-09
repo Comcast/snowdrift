@@ -8,4 +8,6 @@
 #	ssh source
 #	ssh source-netcat-openbsd
 #	ssh source-centos
+#	ssh source-ubuntu
+#	ssh source-ubuntu-openbsd
 #
