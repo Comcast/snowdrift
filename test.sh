@@ -123,8 +123,6 @@ then
 	exit 1
 fi
 
-cat $TMP_TESTS
-
 docker-compose exec testing /mnt/snowdrift /mnt/${TMP_TESTS} | tee $TMP
 
 RESULTS=$(cat $TMP)
