@@ -206,6 +206,9 @@ function parseOutput() {
 		elif [[ "$OUTPUT" =~ .*Connected.* ]]
 		then
 			echo "OK"
+		elif [[ "$OUTPUT" =~ .*open ]]
+		then
+			echo "OK"
 
 		elif [[ "$OUTPUT" =~ .*refused.* ]]
 		then
@@ -222,6 +225,10 @@ function parseOutput() {
 		elif [[ "$OUTPUT" == "dns:FAIL" ]]
 		then
 			echo "FAIL"
+
+		elif [[ "$OUTPUT" == "" ]]
+		then
+			echo "(Empty string received. Are you running BusyBox? Try OpenBSD netcat instead!"
 
 		else
 			echo "UNKNOWN: $OUTPUT"
@@ -378,11 +385,38 @@ function testPath() {
 			continue
 		fi
 
-		CMD="if test -x /usr/bin/nc; \
-			then NC=/usr/bin/nc; \
-			else NC=\`which nc\`; \
-			fi; \
-			\$NC -v -w${TIMEOUT} $DEST $PORT </dev/null 2>&1 "
+		#
+		# We're going to inline a script here that checks to see where
+		# netcat is, and if it's the OpenBSD version.
+		#
+		# This will run on the source host.
+		#
+		CMD=$(cat << EOF
+			if test -x /usr/bin/nc
+			then 
+				NETCAT=/usr/bin/nc
+			else 
+				NETCAT=\`which nc\`
+			fi
+
+
+			IS_OPENBSD=\`\$NETCAT -h 2>&1 | head -n3 | grep OpenBSD\`
+
+			#echo "Netcat DEBUG: ${NETCAT} ${TIMEOUT} ${DEST} ${PORT} OPENBSD=\${IS_OPENBSD}"; exit 1
+
+			if test "\$IS_OPENBSD"
+			then
+				\$NETCAT -vz -w${TIMEOUT} $DEST $PORT </dev/null 2>&1 
+
+			else
+				\$NETCAT -v -w${TIMEOUT} $DEST $PORT </dev/null 2>&1 
+
+			fi
+
+EOF
+)
+
+		#echo "Debug CMD: $CMD" # Debugging
 
 	else
 		NS=$DEST

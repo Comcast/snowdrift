@@ -166,6 +166,33 @@ splunk-01.sys.comcast.net:10.1.2.3:dns:comcast.com
 ```
 
 
+## Netcat Versions Supported
+
+The funny thing about Netcat is that there are so many versions to choose from!
+Some distros even have multiple versions of Netcat available.  Fantastic!
+Below is a list of Linux distros and their versions of NetCat that have been
+tested, a reported with the `./bin/audit-netcat-versions` script:
+
+- Alpine 3.6: `BusyBox v1.26.2 (2018-05-30 13:51:20 GMT) multi-call binary.`
+- Alpine 3.6: `OpenBSD netcat (Debian patchlevel 1.130)`
+- Centos 8: `Ncat 7.70 ( https://nmap.org/ncat )`
+- Ubuntu 19.10: `[v1.10-41.1]`
+- Ubuntu 19.10: `OpenBSD netcat (Debian patchlevel 1.203-1)`
+
+If you don't see your favorite distro on the list, <a href="https://github.com/Comcast/snowdrift/issues">do let me know</a>!
+
+
+## Testing
+
+Run `./test.sh`.  It will spin up multiple Docker containers with Docker Compose
+and run a series of tests.  The values will then be checked expect their expected
+values and results will be output indicating success or failure.
+
+Output from a successful testing run:
+
+<img src="./img/snowdrift-tests.png"  />
+
+
 ## Debugging
 
 The following environment variables can be set to output debugging info:
@@ -175,11 +202,13 @@ The following environment variables can be set to output debugging info:
 - `DEBUG_CMD_OUTPUT` - Print the raw output from the SSH command
 
 
-## Testing
+## Development
 
-Testing can be done via docker, simply cd into the `testing/` directory and
-run the script `go.sh`.  This will spin up some docker containers, and test
-the app from inside them.
+- To build and get into the `testing` container:
+  - `./bin/dev-testing`
+- To build and start the `source` container`
+  - `./bin/dev-source`
+
 
 ## TODO
 

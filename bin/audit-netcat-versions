@@ -1,0 +1,27 @@
+#!/bin/bash
+#
+# Print out all our Netcat versions.
+#
+
+# Errors are fatal
+set -e
+
+echo >&2 "# Spinning up all Docker containers..." 
+docker-compose up -d > /dev/null
+
+echo -n "Alpine 3.6: "
+docker-compose exec source nc --help | head -n1
+
+echo -n "Alpine 3.6: "
+docker-compose exec source-netcat-openbsd nc -h | head -n1
+
+echo -n "Centos 8: "
+docker-compose exec source-centos nc -h | head -n1
+
+echo -n "Ubuntu 19.10: "
+docker-compose exec source-ubuntu nc -h | head -n1
+
+echo -n "Ubuntu 19.10: "
+docker-compose exec source-ubuntu-openbsd nc -h | head -n1
+
+

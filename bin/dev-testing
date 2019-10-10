@@ -1,0 +1,20 @@
+#!/bin/bash
+#
+# This script is used to build the testing container and SSH into it
+#
+
+# Errors are fatal
+set -e
+
+pushd $(dirname $0) > /dev/null
+
+echo "# "
+echo "# Building and executing testing container..."
+echo "# "
+docker-compose kill testing
+docker-compose rm -f testing
+docker-compose build testing
+docker-compose up -d testing
+docker-compose exec testing bash
+
+

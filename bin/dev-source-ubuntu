@@ -1,0 +1,21 @@
+#!/bin/bash
+#
+# This script is used to build the source Ubuntu container.
+#
+
+# Errors are fatal
+set -e
+
+pushd $(dirname $0) > /dev/null
+
+echo "# "
+echo "# Building and executing source Ubuntu container..."
+echo "# "
+docker-compose kill source-ubuntu
+docker-compose rm -f source-ubuntu
+docker-compose build source-ubuntu
+docker-compose up -d source-ubuntu
+
+echo "# Spawning a shell (you can exit and the container will still run..."
+docker-compose exec source-ubuntu bash
+
