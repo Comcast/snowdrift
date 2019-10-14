@@ -8,6 +8,7 @@ tag2/localhost:www.comcast.com:80
 tag2/localhost:www.comcast.com:443
 tag3/localhost::dns:
 tag3/localhost::dns:cnn.com
+tag4/localhost:www.comcast.com:[8080-8083]
 
 #
 # These next ones will fail
@@ -15,5 +16,3 @@ tag3/localhost::dns:cnn.com
 these-will-fail/this-will-fail.comcast.com:google.com:80
 these-will-fail/10.0.0.0:google.com:80
 these-will-fail/10.0.0.0:google.com:80
-
-

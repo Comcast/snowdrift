@@ -8,7 +8,7 @@
 #	$DEBUG_CMD - Set to print out the command sent to SSH
 #	$DEBUG_CMD_OUTPUT- Print raw output from SSH commands
 #	$DEBUG_SSH_CHECK - Set to print out logic used for checking whether we can SSH to a host or not
-# 
+#
 
 # Errors are fatal
 set -e
@@ -20,7 +20,7 @@ TIMEOUT=3
 
 #
 # Our filter
-# 
+#
 FILTER=""
 
 #
@@ -101,7 +101,7 @@ function updateStats() {
 	then
 		STATS_SUCCESS=$(( STATS_SUCCESS + 1 ))
 		STATS_TOTAL_SUCCESS=$(( STATS_TOTAL_SUCCESS + 1 ))
-	else 
+	else
 		STATS_FAIL=$(( STATS_FAIL + 1 ))
 		STATS_TOTAL_FAIL=$(( STATS_TOTAL_FAIL + 1 ))
 	fi
@@ -129,7 +129,7 @@ function checkSSHHost() {
 
 	else
 		sshDebug "Retval for host $HOST was $RETVAL"
-		SSH_FAIL="${SSH_FAIL}:$HOST"	
+		SSH_FAIL="${SSH_FAIL}:$HOST"
 		STATS_SSH_FAIL=$(( STATS_SSH_FAIL + 1))
 		STATS_TOTAL_SSH_FAIL=$(( STATS_TOTAL_SSH_FAIL + 1))
 
@@ -253,7 +253,7 @@ function parseOutput() {
 			fi
 
 		fi
-		
+
 
 	fi
 
@@ -423,7 +423,7 @@ EOF
 		RECORD=${EXTRA:-google.com}
 
 		#
-		# If we're testing DNS, perform a simple DNS query that should resolve 
+		# If we're testing DNS, perform a simple DNS query that should resolve
 		# if we have connectivity to our DNS servers
 		#
 		CMD_NS=""
@@ -587,7 +587,7 @@ function skipLine() {
 function isRange() {
 
 	STR=$1
-	
+
 	if [[ "$STR" =~ \[.*-.*\] ]]
 	then
 		echo true
@@ -624,7 +624,7 @@ function getRange() {
 
 #
 # Determine if the current line is filtered or not.
-# The matching is simply checking for a substring 
+# The matching is simply checking for a substring
 # in a string, nothing fancy!
 #
 function isFiltered() {
@@ -665,7 +665,7 @@ function processFile() {
 		fi
 
 		#
-		# Break our line apart on colon delimiters without spawning 
+		# Break our line apart on colon delimiters without spawning
 		# a subshell every time.
 		#
 		IFS=":" read -r -a FIELDS <<< "$LINE"
@@ -677,7 +677,7 @@ function processFile() {
 
 		#
 		# Parse out our tag.
-		# Note that since tag won't be the 
+		# Note that since tag won't be the
 		#
 		TAG=""
 		if [[ "$SRC" =~ .*/.* ]]
@@ -697,33 +697,40 @@ function processFile() {
 
 		if test "$(isRange $SRC)" != ""
 		then
-			RANGE_HOSTS=$(getRange $SRC)
-			IFS=$OLDIFS
-
-			for HOST in $(echo $RANGE_HOSTS)
-			do
-				testPath "$HOST" "$DEST" "$PORT" "$TAG" "$EXTRA"
-			done
-
-		elif test "$(isRange $DEST)" != ""
-		then
-			RANGE_HOSTS=$(getRange $DEST)
-			IFS=$OLDIFS
-
-			for HOST in $(echo $RANGE_HOSTS)
-			do
-				testPath "$SRC" "$HOST" "$PORT" "$TAG" "$EXTRA"
-			done
-
+			RANGE_SRC=$(getRange $SRC)
 		else
-			testPath "$SRC" "$DEST" "$PORT" "$TAG" "$EXTRA"
-
+			RANGE_SRC="$SRC"
 		fi
+
+		if test "$(isRange $DEST)" != ""
+		then
+			RANGE_DEST=$(getRange $DEST)
+		else
+			RANGE_DEST="$DEST"
+		fi
+
+		if test "$(isRange $PORT)" != ""
+		then
+			RANGE_PORTS=$(getRange $PORT)
+		else
+			RANGE_PORTS="$PORT"
+		fi
+
+		for SRC in ${RANGE_SRC[@]}
+		do
+			for DEST in ${RANGE_DEST[@]}
+			do
+				for PORT in ${RANGE_PORTS[@]}
+				do
+					testPath "$SRC" "$DEST" "$PORT" "$TAG" "$EXTRA"
+				done
+			done
+		done
 
 	done
 
 	IFS=$OLDIFS
-	
+
 } # End of processFile()
 
 
@@ -880,4 +887,3 @@ echo -e "# Total Failed Hosts: ${RED}${STATS_TOTAL_SSH_FAIL}${NC}"
 echo -e "# Total Successful Connections: ${GREEN}${STATS_TOTAL_SUCCESS}${NC}"
 echo -e "# Total Failed Connections: ${RED}${STATS_TOTAL_FAIL}${NC}"
 echo "# "
-
