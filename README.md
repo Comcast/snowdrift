@@ -210,6 +210,11 @@ The following environment variables can be set to output debugging info:
   - `./bin/dev-source`
 
 
+## Credits
+
+- <a href="https://github.com/steinbrueckri">Richard Steinbrück</a> - Added spport for port ranges.
+
+
 ## TODO
 
 [Our TODO List](TODO.md)
