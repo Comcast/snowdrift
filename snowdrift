@@ -397,7 +397,7 @@ function testPath() {
 		#
 		# Additional condition to check if Netcat is installed 
 		# and friendly error message
-		#
+		# 
 		CMD=$(cat << EOF
 			if test -x /usr/bin/nc
 			then 
