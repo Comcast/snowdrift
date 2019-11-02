@@ -1,4 +1,11 @@
 
+#
+# Notes about ports:
+# Ports 80-89: Work normally (Nginx)
+# Ports 440-449: Timeout (Blocked by iptables)
+# Ports 450-459: Nothing listening (connection refused)
+#
+
 source:dest01:80
 source:dest01:81
 source:dest01:440
