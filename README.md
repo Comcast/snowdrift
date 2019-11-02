@@ -192,6 +192,8 @@ Output from a successful testing run:
 
 <img src="./img/snowdrift-tests.png"  />
 
+Tests can be found in <a href="files/snowdrift-tests.txt">files/snowdrift-tests.txt</a>.
+
 
 ## Debugging
 
