@@ -66,10 +66,10 @@ function compareValues() {
 
 	if test "${VAL}" == "${EXPECTED}"
 	then
-		printf "%30s: %-14s ${GREEN}SUCCESS${NC}\n" "${STR}" "${VAL} == ${EXPECTED}"
+		printf "%36s: %-14s ${GREEN}SUCCESS${NC}\n" "${STR}" "${VAL} == ${EXPECTED}"
 
 	else
-		printf "%30s: %-14s ${RED}FAIL${NC}\n" "${STR}" "${VAL} == ${EXPECTED}"
+		printf "%36s: %-14s ${RED}FAIL${NC}\n" "${STR}" "${VAL} == ${EXPECTED}"
 
 	fi
 
@@ -128,16 +128,18 @@ docker-compose exec testing /mnt/snowdrift /mnt/${TMP_TESTS} | tee $TMP
 RESULTS=$(cat $TMP)
 rm -f $TMP $TMP_TESTS
 
+NUM_NETCAT_NOT_INSTALLED=$(echo "$RESULTS" | grep "Netcat not installed" | wc -l | awk '{print $1}' )
 TOTAL_HOSTS_SUCCESS=$(getMetric "Total Successful Hosts: ")
 TOTAL_HOSTS_FAILED=$(getMetric "Total Failed Hosts: ")
 TOTAL_CONNS_SUCCESS=$(getMetric "Total Successful Connections: ")
 TOTAL_CONNS_FAILED=$(getMetric "Total Failed Connections: ")
 
 
-compareValues "Total Hosts Successful" $TOTAL_HOSTS_SUCCESS "5"
+compareValues "Num tests where Netcat not installed" $NUM_NETCAT_NOT_INSTALLED "6"
+compareValues "Total Hosts Successful" $TOTAL_HOSTS_SUCCESS "6"
 compareValues "Total Hosts Failed" $TOTAL_HOSTS_FAILED "ZERO"
 compareValues "Total Connections Successful" $TOTAL_CONNS_SUCCESS "36"
-compareValues "Total Connections Failed" $TOTAL_CONNS_FAILED "15"
+compareValues "Total Connections Failed" $TOTAL_CONNS_FAILED "21"
 
 
 echo "# Done!"
