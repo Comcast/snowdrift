@@ -606,7 +606,16 @@ function isRange() {
 
 } # End of isRange()
 
+function isSeperated() {
 
+	STR=$1
+
+	if [[ "$STR" =~ \[.*,.*\] ]]
+	then
+		echo true
+	fi
+
+} # End of isRange()
 #
 # This function takes a string with a range specification, and returns the range.
 #
@@ -632,6 +641,23 @@ function getRange() {
 
 } # End of getRange()
 
+function getSeperated() {
+
+	STR=$1
+
+	IFS="[" read -r -a FIELDS <<< "$STR"
+	PREFIX=${FIELDS[0]}
+	
+	IFS="]" read -r -a FIELDS <<< "${FIELDS[1]}"
+	SUFFIX=${FIELDS[1]}
+
+	IFS="," read -r -a PORTS <<< "${FIELDS[0]}"
+	for I in "${PORTS[@]}"; do
+		HOST="${PREFIX}${I}${SUFFIX}"
+		echo $HOST
+	done
+
+} # End of getSeperated()
 
 #
 # Determine if the current line is filtered or not.
@@ -724,7 +750,12 @@ function processFile() {
 		then
 			RANGE_PORTS=$(getRange $PORT)
 		else
-			RANGE_PORTS="$PORT"
+			if test "$(isSeperated $PORT)" != ""
+			then
+				RANGE_PORTS=$(getSeperated $PORT)
+			else
+				RANGE_PORTS="$PORT"
+			fi
 		fi
 
 		for SRC in ${RANGE_SRC[@]}

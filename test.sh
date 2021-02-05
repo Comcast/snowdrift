@@ -2,7 +2,7 @@
 #
 # Thie script runs a full test of our Snowdrift functionality.
 #
-# AFAIK, testing frameworks for bash don't really exist, so 
+# AFAIK, testing frameworks for bash don't really exist, so
 # I'm gonna have to improvise here.
 #
 
@@ -138,8 +138,8 @@ TOTAL_CONNS_FAILED=$(getMetric "Total Failed Connections: ")
 compareValues "Num tests where Netcat not installed" $NUM_NETCAT_NOT_INSTALLED "6"
 compareValues "Total Hosts Successful" $TOTAL_HOSTS_SUCCESS "6"
 compareValues "Total Hosts Failed" $TOTAL_HOSTS_FAILED "ZERO"
-compareValues "Total Connections Successful" $TOTAL_CONNS_SUCCESS "36"
-compareValues "Total Connections Failed" $TOTAL_CONNS_FAILED "21"
+compareValues "Total Connections Successful" $TOTAL_CONNS_SUCCESS "54"
+compareValues "Total Connections Failed" $TOTAL_CONNS_FAILED "18"
 
 
 echo "# Done!"
