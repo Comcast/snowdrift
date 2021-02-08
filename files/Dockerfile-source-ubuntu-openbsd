@@ -1,5 +1,5 @@
 
-FROM ubuntu:19.10
+FROM ubuntu:latest
 
 #
 # Based on some instructions found at https://gist.github.com/pokle/10808069
