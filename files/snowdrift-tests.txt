@@ -22,7 +22,7 @@ range/source-netcat-openbsd:dest01:[450-452]
 comma/source-netcat-openbsd:dest[01-03]:80
 comma/source-netcat-openbsd:dest01:[80,81,82]
 comma/source-netcat-openbsd:dest[01-03]:[80,81,82]
-comma/source-netcat-openbsd:dest01:[440,441442]
+comma/source-netcat-openbsd:dest01:[440,441,442]
 comma/source-netcat-openbsd:dest01:[450,451,452]
 
 
