@@ -36,6 +36,24 @@ services:
     environment:
       - SSH_ENABLE_ROOT=true
 
+  source-no-netcat:
+    # 
+    # Docs for this excelent container available at:
+    # 
+    # https://github.com/panubo/docker-sshd
+    # 
+    build:
+      context: .
+      dockerfile: files/Dockerfile-source-no-netcat
+
+    volumes:
+      - .:/mnt
+      - ./files/dummy-ssh-keys/testing.pub:/root/.ssh/authorized_keys
+      - ./files/source-motd:/etc/motd
+
+    environment:
+      - SSH_ENABLE_ROOT=true
+
   source-netcat-openbsd:
 
     build:
