@@ -109,6 +109,13 @@ fi
 echo "# "
 echo "# Running Snowdrift tests..."
 echo "# "
+echo "# Behavior varies by port range: "
+echo "# "
+echo "# Ports  80 to  80: Connection will be sucessful."
+echo "# Ports 440 to 449: Connection will time out.  THIS IS NORMAL AND PART OF THE TEST."
+echo "# Ports 450 to 459: Connection will be refused.  THIS IS ALSO NORMAL AND PART OF THE TEST."
+echo "# "
+
 TMP=$(mktemp -t snowdrift)
 TMP_TESTS="files/snowdrift-tests.txt.tmp"
 cat files/snowdrift-tests.txt | grep "${FILTER}" > ${TMP_TESTS} || true
@@ -143,6 +150,10 @@ compareValues "Total Connections Failed" $TOTAL_CONNS_FAILED "24"
 
 
 echo "# Done!"
-
+echo "# "
+echo "# Note that Docker containers are still running."
+echo "# Run ' docker-compose kill; docker-compose rm -f ' to remove currently running Docker containers."
+echo "# "
+echo "# "
 
 
