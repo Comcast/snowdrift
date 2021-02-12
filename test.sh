@@ -139,7 +139,7 @@ compareValues "Num tests where Netcat not installed" $NUM_NETCAT_NOT_INSTALLED "
 compareValues "Total Hosts Successful" $TOTAL_HOSTS_SUCCESS "6"
 compareValues "Total Hosts Failed" $TOTAL_HOSTS_FAILED "ZERO"
 compareValues "Total Connections Successful" $TOTAL_CONNS_SUCCESS "54"
-compareValues "Total Connections Failed" $TOTAL_CONNS_FAILED "18"
+compareValues "Total Connections Failed" $TOTAL_CONNS_FAILED "24"
 
 
 echo "# Done!"
