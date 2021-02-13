@@ -192,6 +192,8 @@ Output from a successful testing run:
 
 <img src="./img/snowdrift-tests.png"  />
 
+Tests can be found in <a href="files/snowdrift-tests.txt">files/snowdrift-tests.txt</a>.
+
 
 ## Debugging
 
@@ -213,6 +215,7 @@ The following environment variables can be set to output debugging info:
 ## Credits
 
 - <a href="https://github.com/steinbrueckri">Richard Steinbrück</a> - Added spport for port ranges.
+- <a href="https://github.com/ladrob">ladrob</a> - Added friendly message for when Netcat is not installed
 
 
 ## TODO

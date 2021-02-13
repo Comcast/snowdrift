@@ -77,7 +77,7 @@ function getColor() {
 	then
 		RETVAL=$RED
 
-	elif test "$OUTPUT" == "FAIL"
+	elif [[ "$OUTPUT" =~ FAIL.* ]]
 	then
 		RETVAL=$RED
 
@@ -225,6 +225,10 @@ function parseOutput() {
 		elif [[ "$OUTPUT" == "dns:FAIL" ]]
 		then
 			echo "FAIL"
+
+                elif [[ "$OUTPUT" =~ Netcat\ not\ installed ]]
+                then
+                        echo "FAIL: $OUTPUT"
 
 		elif [[ "$OUTPUT" == "" ]]
 		then
@@ -391,6 +395,9 @@ function testPath() {
 		#
 		# This will run on the source host.
 		#
+		# Additional condition to check if Netcat is installed 
+		# and friendly error message
+		#
 		CMD=$(cat << EOF
 			if test -x /usr/bin/nc
 			then 
@@ -404,14 +411,18 @@ function testPath() {
 
 			#echo "Netcat DEBUG: ${NETCAT} ${TIMEOUT} ${DEST} ${PORT} OPENBSD=\${IS_OPENBSD}"; exit 1
 
-			if test "\$IS_OPENBSD"
-			then
-				\$NETCAT -vz -w${TIMEOUT} $DEST $PORT </dev/null 2>&1 
+                        if test "\$NETCAT" 
+                        then
+                                if test "\$IS_OPENBSD"
+                                then
+                                        \$NETCAT -vz -w${TIMEOUT} $DEST $PORT </dev/null 2>&1
 
-			else
-				\$NETCAT -v -w${TIMEOUT} $DEST $PORT </dev/null 2>&1 
-
-			fi
+                                else
+                                        \$NETCAT -v -w${TIMEOUT} $DEST $PORT </dev/null 2>&1
+                                fi
+                        else
+                                echo "[\`hostname\`] Netcat not installed";
+                        fi
 
 EOF
 )
@@ -595,7 +606,16 @@ function isRange() {
 
 } # End of isRange()
 
+function isSeperated() {
 
+	STR=$1
+
+	if [[ "$STR" =~ \[.*,.*\] ]]
+	then
+		echo true
+	fi
+
+} # End of isRange()
 #
 # This function takes a string with a range specification, and returns the range.
 #
@@ -621,6 +641,23 @@ function getRange() {
 
 } # End of getRange()
 
+function getSeperated() {
+
+	STR=$1
+
+	IFS="[" read -r -a FIELDS <<< "$STR"
+	PREFIX=${FIELDS[0]}
+	
+	IFS="]" read -r -a FIELDS <<< "${FIELDS[1]}"
+	SUFFIX=${FIELDS[1]}
+
+	IFS="," read -r -a PORTS <<< "${FIELDS[0]}"
+	for I in "${PORTS[@]}"; do
+		HOST="${PREFIX}${I}${SUFFIX}"
+		echo $HOST
+	done
+
+} # End of getSeperated()
 
 #
 # Determine if the current line is filtered or not.
@@ -713,7 +750,12 @@ function processFile() {
 		then
 			RANGE_PORTS=$(getRange $PORT)
 		else
-			RANGE_PORTS="$PORT"
+			if test "$(isSeperated $PORT)" != ""
+			then
+				RANGE_PORTS=$(getSeperated $PORT)
+			else
+				RANGE_PORTS="$PORT"
+			fi
 		fi
 
 		for SRC in ${RANGE_SRC[@]}

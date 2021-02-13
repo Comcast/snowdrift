@@ -1,10 +1,24 @@
 
+#
+# Notes about ports:
+# Ports 80-89: Work normally (Nginx)
+# Ports 440-449: Timeout (Blocked by iptables)
+# Ports 450-459: Nothing listening (connection refused)
+#
+
 source:dest01:80
 source:dest01:81
 source:dest01:440
 source:dest01:441
 source:dest01:450
 source:dest01:451
+
+source-no-netcat:dest01:80
+source-no-netcat:dest01:81
+source-no-netcat:dest01:440
+source-no-netcat:dest01:441
+source-no-netcat:dest01:450
+source-no-netcat:dest01:451
 
 source-netcat-openbsd:dest01:80
 source-netcat-openbsd:dest01:81
@@ -18,6 +32,13 @@ range/source-netcat-openbsd:dest01:[80-82]
 range/source-netcat-openbsd:dest[01-03]:[80-82]
 range/source-netcat-openbsd:dest01:[440-442]
 range/source-netcat-openbsd:dest01:[450-452]
+
+comma/source-netcat-openbsd:dest[01-03]:80
+comma/source-netcat-openbsd:dest01:[80,81,82]
+comma/source-netcat-openbsd:dest[01-03]:[80,81,82]
+comma/source-netcat-openbsd:dest01:[440,441,442]
+comma/source-netcat-openbsd:dest01:[450,451,452]
+
 
 source-centos:dest01:80
 source-centos:dest01:81
@@ -39,4 +60,6 @@ source-ubuntu-openbsd:dest01:440
 source-ubuntu-openbsd:dest01:441
 source-ubuntu-openbsd:dest01:450
 source-ubuntu-openbsd:dest01:451
+
+
 
