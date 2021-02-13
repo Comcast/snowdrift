@@ -69,20 +69,41 @@ function getColor() {
 	OUTPUT=$1
 
 	RETVAL=$NC
-	if [[ "$OUTPUT" =~ OK.* ]]
-	then
-		RETVAL=$GREEN
 
-	elif [[ "$OUTPUT" =~ Timeout.* ]]
+	if test ! "${EXTRA}"
 	then
-		RETVAL=$RED
 
-	elif [[ "$OUTPUT" =~ FAIL.* ]]
-	then
-		RETVAL=$RED
+		if [[ "$OUTPUT" =~ OK.* ]]
+		then
+			RETVAL=$GREEN
+
+		elif [[ "$OUTPUT" =~ Timeout.* ]]
+		then
+			RETVAL=$RED
+
+		elif [[ "$OUTPUT" =~ FAIL.* ]]
+		then
+			RETVAL=$RED
+
+		else
+			RETVAL="$RED[UNKNOWN] "
+
+		fi
 
 	else
-		RETVAL="$RED[UNKNOWN] "
+		#
+		# If the extra value present and in our output string,
+		# change the color to green, because it's expected.
+		#
+		# That way, if we're REALLY expecting things like "Connection refused", that's okay.
+		#
+		#echo "OUTPUT, EXTRA: ${OUTPUT}, ${EXTRA}" # Debugging
+		if [[ "${OUTPUT}" =~ "${EXTRA}" ]]
+		then
+			RETVAL=$GREEN
+		else
+			RETVAL=$RED
+		fi
 
 	fi
 
@@ -97,13 +118,34 @@ function getColor() {
 function updateStats() {
 
 	STR=$1
-	if [[ "$STR" =~ OK.* ]]
+	EXTRA=$2
+
+	if test ! "${EXTRA}"
 	then
-		STATS_SUCCESS=$(( STATS_SUCCESS + 1 ))
-		STATS_TOTAL_SUCCESS=$(( STATS_TOTAL_SUCCESS + 1 ))
+
+		if [[ "$STR" =~ OK.* ]]
+		then
+			STATS_SUCCESS=$(( STATS_SUCCESS + 1 ))
+			STATS_TOTAL_SUCCESS=$(( STATS_TOTAL_SUCCESS + 1 ))
+		else
+			STATS_FAIL=$(( STATS_FAIL + 1 ))
+			STATS_TOTAL_FAIL=$(( STATS_TOTAL_FAIL + 1 ))
+		fi
+
 	else
-		STATS_FAIL=$(( STATS_FAIL + 1 ))
-		STATS_TOTAL_FAIL=$(( STATS_TOTAL_FAIL + 1 ))
+		#
+		# If there's an expected string, check to see that it exists
+		# in the string that we got.
+		#
+		if [[ "${STR}" =~ "${EXTRA}" ]]
+		then
+			STATS_SUCCESS=$(( STATS_SUCCESS + 1 ))
+			STATS_TOTAL_SUCCESS=$(( STATS_TOTAL_SUCCESS + 1 ))
+		else
+			STATS_FAIL=$(( STATS_FAIL + 1 ))
+			STATS_TOTAL_FAIL=$(( STATS_TOTAL_FAIL + 1 ))
+		fi
+
 	fi
 
 } # End of updateStats()
@@ -212,7 +254,7 @@ function parseOutput() {
 
 		elif [[ "$OUTPUT" =~ .*refused.* ]]
 		then
-			echo "OK: Connection Refused"
+			echo "OK - Connection Refused"
 
 		elif [[ "$OUTPUT" =~ .*timed\ out.* ]]
 		then
@@ -232,7 +274,7 @@ function parseOutput() {
 
 		elif [[ "$OUTPUT" == "" ]]
 		then
-			echo "(Empty string received. Are you running BusyBox? Try OpenBSD netcat instead!"
+			echo "(Empty string received. Are you running BusyBox? Try OpenBSD netcat instead!)"
 
 		else
 			echo "UNKNOWN: $OUTPUT"
@@ -367,6 +409,9 @@ function testPath() {
 	PORT=$3
 	TAG=$4
 	EXTRA=$5
+	EXTRA2=$5
+
+	#echo "EXTRA: ${EXTRA}, ${EXTRA2}" # Debugging
 
 	#
 	# Were we able to SSH to this host? If not, do a quick test!
@@ -502,8 +547,26 @@ EOF
 		echo "SSH OUTPUT: $OUTPUT"
 	fi
 
+	#
+	# Turn our raw output into a well structured string.
+	#
 	OUTPUT=$(parseOutput "$PORT" "$OUTPUT" "$RETVAL")
+
 	COLOR=$(getColor $OUTPUT)
+
+	#
+	# If we have expected output, check for a match.
+	#
+	if test "${EXTRA}"
+	then
+		if [[ "${OUTPUT}" =~ "${EXTRA}" ]]
+		then
+			true
+		else
+			OUTPUT="${OUTPUT} ('${EXTRA}' expected)"
+		fi
+	fi
+
 	echo -e "${COLOR}$OUTPUT${NC}"
 
 	#
@@ -511,7 +574,7 @@ EOF
 	#
 	doTraceroutes "$SRC" "$DEST" "$PORT" "$OUTPUT"
 
-	updateStats $OUTPUT
+	updateStats ${OUTPUT} ${EXTRA}
 
 } # End of testPath()
 
@@ -528,8 +591,9 @@ function printSyntax() {
 	echo "! "
 	echo "! 	Rules format:"
 	echo "! "
-	echo "! 		[tag/]\$source_host:\$dest_host:\$tcp_port"
+	echo "! 		[tag/]\$source_host:\$dest_host:\$tcp_port:[Expected text]"
 	echo "! 			SSH into source_host and use netcat to connec to dest_host on specified TCP port"
+	echo "!			If 'Expected text' is specified, it will be checked to see if it matches the status.  If not, it's treated as an error and will show up in red.  If it does match, it shows up in green and PASSES."
 	echo "! "
 	echo "! 		[tag/]\$source_host:[\$dns_server]:dns:[\$hostname]"
 	echo "! 			SSH into source_host and use dig to lookup a hostname against the specified DNS server."
@@ -691,6 +755,7 @@ function processFile() {
 	for LINE in $(cat $FILE)
 	do
 
+		#echo "LINE: ${LINE}" # Debugging
 		if test "$(skipLine $LINE)" != ""
 		then
 			continue
@@ -711,6 +776,8 @@ function processFile() {
 		DEST=${FIELDS[1]}
 		PORT=${FIELDS[2]}
 		EXTRA=${FIELDS[3]}
+		EXTRA2=${FIELDS[4]}
+		#echo "EXTRA: ${EXTRA}, ${EXTRA2}" # Debugging
 
 		#
 		# Parse out our tag.
@@ -764,7 +831,7 @@ function processFile() {
 			do
 				for PORT in ${RANGE_PORTS[@]}
 				do
-					testPath "$SRC" "$DEST" "$PORT" "$TAG" "$EXTRA"
+					testPath "$SRC" "$DEST" "$PORT" "$TAG" "$EXTRA" "$EXTRA2"
 				done
 			done
 		done
