@@ -215,7 +215,8 @@ The following environment variables can be set to output debugging info:
 ## Credits
 
 - <a href="https://github.com/steinbrueckri">Richard Steinbrück</a> - Added spport for port ranges.
-- <a href="https://github.com/ladrob">ladrob</a> - Added friendly message for when Netcat is not installed
+- <a href="https://github.com/ladrob">ladrob</a> - Added friendly message for when Netcat is not installed.
+- <a href="https://github.com/biehlera">biehlera</a> - Added support for comma-separated port list.
 
 
 ## TODO
